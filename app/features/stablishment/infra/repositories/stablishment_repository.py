@@ -24,5 +24,48 @@ class StablishmentRepository(BaseRepository[StablishmentEntity]):
             }
         ]).to_list()
 
-        print(stablishments)
         return stablishments
+
+    def countByDistanceRadius(
+        self, stablishment: StablishmentEntity, radius: float
+    ) -> int:
+        return (
+            self._connection.aggregate([
+                {
+                    "$geoNear": {
+                        "near": {
+                            "type": "Point",
+                            "coordinates": [
+                                stablishment["longitude"],
+                                stablishment["latitude"],
+                            ],
+                        },
+                        "distanceField": "distance",
+                        "maxDistance": radius,
+                        "spherical": True,
+                    }
+                }
+            ])
+            .to_list()
+            .__len__()
+        )
+
+    def listWithDistanceRadius(
+        self, stablishment: StablishmentEntity, radius: float
+    ) -> List[StablishmentEntity]:
+        return self._connection.aggregate([
+            {
+                "$geoNear": {
+                    "near": {
+                        "type": "Point",
+                        "coordinates": [
+                            stablishment.longitude,
+                            stablishment.latitude,
+                        ],
+                    },
+                    "distanceField": "distance",
+                    "maxDistance": radius,
+                    "spherical": True,
+                }
+            }
+        ]).to_list()

@@ -17,7 +17,6 @@ class CreateStablishmentUseCase:
 
     def execute(self, dto: CreateStablishmentDto) -> StablishmentEntity:
         stablishments = self.stablishment_repository.findByDistance(dto, 2000)
-
         if len(stablishments) > 0:
             raise HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST,
