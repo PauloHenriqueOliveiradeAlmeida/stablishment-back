@@ -1,4 +1,4 @@
-from fastapi.exceptions import BaseModel
+from pydantic import BaseModel
 
 
 class GetStablishmentDto(BaseModel):

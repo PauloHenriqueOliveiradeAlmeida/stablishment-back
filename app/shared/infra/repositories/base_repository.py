@@ -1,25 +1,40 @@
-from typing import TypeVar
+from abc import ABC, abstractmethod
+from typing import TypeVar, Generic
 from pymongo import MongoClient
-from bson.objectid import ObjectId
+from app.settings import settings
+from app.shared.domain.entities.base_entity import BaseEntity
+from app.shared.domain.value_objects.guid import Guid
 
-T = TypeVar("T")
+
+T = TypeVar("T", bound=BaseEntity)
 
 
-class BaseRepository[T]:
-    __client: MongoClient = MongoClient(
-        "mongodb+srv://paulo:Ptdk1282@uniso.wvwnctm.mongodb.net/?retryWrites=true&w=majority&appName=uniso"
-    )
+class BaseRepository(ABC, Generic[T]):
+    __client: MongoClient = MongoClient(settings.database_url)
 
     def __init__(self, collection: str) -> None:
-        self._connection = self.__client["stablishments_app"][collection]
+        self._connection = self.__client[settings.database_collection][collection]
 
-    def create(self, data: T) -> T | None:
-        id = self._connection.insert_one(data.__dict__).inserted_id
-        return {**self._connection.find_one({"_id": ObjectId(id)}), "id": id.__str__()}
+    def create(self, data: T) -> bool:
+        id = data.id.value
+        dict_data = data.to_dict()
+        created = self._connection.insert_one({**dict_data, "_id": id})
 
-    def find(self, id: str) -> T | None:
-        return self._connection.find_one({"_id": ObjectId(id)})
+        if (created.inserted_id) is None:
+            return False
 
-    def list(self) -> list[T]:
+        return True
+
+    def find(self, id: Guid) -> T | None:
+        data = self._connection.find_one({"_id": id.value})
+        if data is None:
+            return None
+        return self.build({**data, "id": data["_id"]})
+
+    def getMany(self) -> list[T]:
         items = self._connection.find().to_list(length=None)
-        return [{**item, "id": item["_id"].__str__()} for item in items]
+        return [self.build({**item, "id": item["_id"]}) for item in items]
+
+    @abstractmethod
+    def build(self, data: dict) -> T:
+        pass
