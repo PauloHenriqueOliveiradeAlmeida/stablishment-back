@@ -24,4 +24,4 @@ docker-compose up --build --detach
 ```
 
 ## 🏃 Testando
-Para testar, basta acessar a URL: https://localhost:3000/docs
+Para testar, basta acessar a URL: http://localhost:3000/docs
