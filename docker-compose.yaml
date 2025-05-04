@@ -1,0 +1,18 @@
+services:
+  mongo:
+    image: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongo:/docker-entrypoint-initdb.d
+
+  stablishment:
+    build: .
+    ports:
+      - 3000:3000
+    depends_on:
+      - mongo
+    environment:
+      - DATABASE_URL=mongodb://mongo:27017
+      - DATABASE_COLLECTION=stablishments
+      - BLOCKCHAIN_DIFFICULTY=6
