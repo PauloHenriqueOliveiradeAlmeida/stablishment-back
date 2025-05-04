@@ -15,7 +15,7 @@ from app.features.stablishment.dtos.request.create_stablishment_dto import (
 from http import HTTPStatus
 from fastapi import HTTPException
 
-from app.settings import Settings
+from app.settings import settings
 
 
 class CreateStablishmentUseCase:
@@ -56,7 +56,7 @@ class CreateStablishmentUseCase:
 
         blockchain = self.blockchain_repository.get()
         if blockchain is None:
-            blockchain = BlockChain(difficulty=Settings.blockchain_difficulty)
+            blockchain = BlockChain(difficulty=settings.blockchain_difficulty)
             self.blockchain_repository.create(blockchain)
 
         blockchain.add_block({"stablishment_id": stablishment.id.value})
